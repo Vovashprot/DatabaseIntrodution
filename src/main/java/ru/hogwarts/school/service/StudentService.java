@@ -1,40 +1,44 @@
 package ru.hogwarts.school.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.repositories.StudentRepository;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.List;
+
 @Service
 public class StudentService {
-    HashMap<Long, Student> studentMap = new HashMap<>();
-    long counter = 0L;
+    @Autowired
+    private final StudentRepository studentRepository;
+
+    public StudentService(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
+    }
 
     public Student createStudent (Student newStudent){
-        newStudent.setId(counter++);
-        studentMap.put(newStudent.getId(),newStudent);
-        return newStudent;
+        return studentRepository.save(newStudent);
     }
 
     public Student getStudent (Long counterLocal){
-        if (counterLocal>counter){
-            throw new RuntimeException();
-        }
-        return studentMap.get(counterLocal);
+        return studentRepository.getById(counterLocal);
     }
 
-    public Student editStudent (Long counterLocal,Student newStudent){
-        if (!studentMap.containsKey(newStudent.getId())) {
-            return null;
-        }
-        studentMap.put(counterLocal,newStudent);
-        return studentMap.get(counterLocal);
+    public Student editStudent (Student newStudent){
+        return studentRepository.save(newStudent);
     }
-    public Student removeStudent (Long id){
-        return studentMap.remove(id);
+    public void removeStudent (Long id){
+        studentRepository.deleteById(id);
     }
     public Collection<Student> getAllStudents(){
-        return studentMap.values();
+        return studentRepository.findAll();
+    }
+    public List<Student> findStudentByAgeBetween(int minAge, int maxAge){
+        return studentRepository.findByAgeBetween(minAge, maxAge);
+    }
+
+    public List<Student> findStudentByFaculty(String name){
+        return studentRepository.findByFacultyContaining(name);
     }
 }
